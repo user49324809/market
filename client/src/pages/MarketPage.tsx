@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ListingCard } from '../components/ListingCard';
-import { createOrder, getMarketListings } from '../services/api';
+import { createOrder, getMarketListings, payOrder } from '../services/api';
 import { ACTIVE_VILLAGER_ID } from '../config/player';
 import type { MarketListing } from '../types/market';
 
@@ -25,7 +25,13 @@ export function MarketPage() {
   }, []);
 
   async function handleBuy(listingId: number) {
-    await createOrder(listingId, ACTIVE_VILLAGER_ID, 1);
+    const order = await createOrder(
+      listingId,
+      ACTIVE_VILLAGER_ID,
+      1
+    );
+
+    await payOrder(order.id);
   }
 
   return (
