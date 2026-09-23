@@ -12,8 +12,12 @@ const unitLabels: Record<string, string> = {
   g: 'г',
   pcs: 'шт.',
 };
+interface ListingCardProps {
+  listing: MarketListing;
+  onBuy: () => void;
+}
 
-export function ListingCard({ listing }: { listing: MarketListing }) {
+export function ListingCard({ listing, onBuy }: ListingCardProps) {
   const unit = unitLabels[listing.unit] ?? listing.unit;
 
   return (
@@ -39,7 +43,11 @@ export function ListingCard({ listing }: { listing: MarketListing }) {
         </span>
       </div>
 
-      <button type="button" disabled title="Покупка откроется на следующем этапе">
+      <button
+        type="button"
+        onClick={onBuy}
+        disabled={listing.status !== 'active' || listing.quantity <= 0}
+      >
         Купить
       </button>
     </article>
