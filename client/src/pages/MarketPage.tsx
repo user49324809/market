@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ListingCard } from '../components/ListingCard';
-import { getMarketListings } from '../services/api';
+import { createOrder, getMarketListings } from '../services/api';
+import { ACTIVE_VILLAGER_ID } from '../config/player';
 import type { MarketListing } from '../types/market';
 
 export function MarketPage() {
@@ -22,6 +23,10 @@ export function MarketPage() {
       active = false;
     };
   }, []);
+
+  async function handleBuy(listingId: number) {
+    await createOrder(listingId, ACTIVE_VILLAGER_ID, 1);
+  }
 
   return (
     <section className="market-page" aria-labelledby="market-title">
@@ -49,7 +54,11 @@ export function MarketPage() {
       {!error && listings && listings.length > 0 && (
         <div className="listing-grid">
           {listings.map((listing) => (
-            <ListingCard listing={listing} key={listing.id} />
+            <ListingCard
+              listing={listing}
+              key={listing.id}
+              onBuy={() => handleBuy(listing.id)}
+            />
           ))}
         </div>
       )}
