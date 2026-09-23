@@ -40,3 +40,15 @@ export async function createOrder(
 
   return response.json();
 }
+
+export async function payOrder(orderId: number) {
+  const response = await fetch(`/api/orders/${orderId}/pay`, {
+    method: 'POST',
+  });
+
+  if (!response.ok) {
+    throw new Error('Не удалось оплатить заказ');
+  }
+
+  return response.json();
+}
