@@ -29,7 +29,7 @@ export async function createOrder(
     },
     body: JSON.stringify({
       listingId,
-      buyerId,
+      buyerVillagerId: buyerId,
       quantity,
     }),
   });
