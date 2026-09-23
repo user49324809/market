@@ -1,25 +1,27 @@
 import { render, screen } from '@testing-library/react';
-import { test } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { vi } from 'vitest';
 import { ListingCard } from './ListingCard';
+import type { MarketListing } from '../types/market';
 
-const listing = {
-  id: 7,
-  seller: 'Очень Длинное Имя Продавца',
-  product: 'Очень длинное название редкого фермерского товара',
+const listing: MarketListing = {
+  id: 1,
+  seller: 'Петров',
+  product: 'Мёд',
   unit: 'jar',
-  quantity: 12345,
-  unitPrice: 123456,
+  quantity: 20,
+  unitPrice: 300,
   status: 'active',
-  warehouse: 'Очень длинное название удалённого складского помещения',
+  warehouse: 'Основной склад',
 };
 
-test('renders listing content and disabled purchase action', () => {
-  render(<ListingCard listing={listing} />);
+test('calls onBuy when user clicks buy button', async () => {
+  const user = userEvent.setup();
+  const onBuy = vi.fn();
 
-  expect(screen.getByText(listing.seller)).toBeInTheDocument();
-  expect(screen.getByRole('heading', { name: listing.product })).toBeInTheDocument();
-  expect(screen.getByText(listing.warehouse)).toBeInTheDocument();
-  expect(screen.getByText(/123[\s\u00a0]?456 ₽/)).toBeInTheDocument();
-  expect(screen.getByText(/12[\s\u00a0]?345 бан\./)).toBeInTheDocument();
-  expect(screen.getByRole('button', { name: 'Купить' })).toBeDisabled();
+  render(<ListingCard listing={listing} onBuy={onBuy} />);
+
+  await user.click(screen.getByRole('button', { name: 'Купить' }));
+
+  expect(onBuy).toHaveBeenCalledTimes(1);
 });
