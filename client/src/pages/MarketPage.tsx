@@ -32,6 +32,8 @@ export function MarketPage() {
     );
 
     await payOrder(order.id);
+    const updatedListings = await getMarketListings();
+    setListings(updatedListings);
   }
 
   return (
