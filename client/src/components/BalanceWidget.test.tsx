@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, test, vi } from 'vitest';
 import { getVillagerBalance } from '../services/api';
 import { BalanceWidget } from './BalanceWidget';
@@ -32,4 +32,28 @@ test('shows a readable error when balance request fails', async () => {
   render(<BalanceWidget villagerId={1} />);
 
   expect(await screen.findByText('Баланс временно недоступен')).toBeInTheDocument();
+});
+
+test('reloads balance when refreshKey changes', async () => {
+  mockedGetVillagerBalance.mockResolvedValue({
+    id: 1,
+    name: 'Глаша',
+    balance: 5000,
+  });
+
+  const { rerender } = render(
+    <BalanceWidget villagerId={1} refreshKey={0} />
+  );
+
+  await waitFor(() => {
+    expect(mockedGetVillagerBalance).toHaveBeenCalledTimes(1);
+  });
+
+  rerender(
+    <BalanceWidget villagerId={1} refreshKey={1} />
+  );
+
+  await waitFor(() => {
+    expect(mockedGetVillagerBalance).toHaveBeenCalledTimes(2);
+  });
 });
