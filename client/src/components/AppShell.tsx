@@ -4,12 +4,16 @@ import { Header } from './Header';
 
 interface AppShellProps {
   children: ReactNode;
+  balanceRefreshKey?: number;
 }
 
-export function AppShell({ children }: AppShellProps) {
+export function AppShell({
+  children,
+  balanceRefreshKey = 0,
+}: AppShellProps) {
   return (
     <div className="app-shell">
-      <Header />
+      <Header balanceRefreshKey={balanceRefreshKey} />
       <main className="app-main">{children}</main>
       <BottomNav />
     </div>
