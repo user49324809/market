@@ -4,9 +4,13 @@ import type { VillagerBalance } from '../types/villager';
 
 interface BalanceWidgetProps {
   villagerId: number;
+  refreshKey?: number;
 }
 
-export function BalanceWidget({ villagerId }: BalanceWidgetProps) {
+export function BalanceWidget({
+  villagerId,
+  refreshKey = 0,
+}: BalanceWidgetProps) {
   const [data, setData] = useState<VillagerBalance | null>(null);
   const [error, setError] = useState(false);
 
@@ -27,7 +31,7 @@ export function BalanceWidget({ villagerId }: BalanceWidgetProps) {
     return () => {
       active = false;
     };
-  }, [villagerId]);
+  }, [villagerId, refreshKey]);
 
   if (error) {
     return (
