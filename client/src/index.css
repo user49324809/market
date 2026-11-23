@@ -300,10 +300,16 @@ button:focus-visible {
   z-index: 1;
   margin-top: 4px;
   padding: 11px 14px;
-  color: #789086;
-  background: #eaf0ec;
+  color: white;
+  background: var(--green-700);
   border-radius: 12px;
   font-weight: 800;
+  cursor: pointer;
+}
+
+.listing-card button:disabled {
+  color: #789086;
+  background: #eaf0ec;
   cursor: not-allowed;
 }
 

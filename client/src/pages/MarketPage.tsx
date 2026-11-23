@@ -4,7 +4,13 @@ import { createOrder, getMarketListings, payOrder } from '../services/api';
 import { ACTIVE_VILLAGER_ID } from '../config/player';
 import type { MarketListing } from '../types/market';
 
-export function MarketPage() {
+interface MarketPageProps {
+  onPurchaseComplete?: () => void;
+}
+
+export function MarketPage({
+  onPurchaseComplete,
+}: MarketPageProps) {
   const [listings, setListings] = useState<MarketListing[] | null>(null);
   const [error, setError] = useState(false);
 
@@ -34,6 +40,7 @@ export function MarketPage() {
     await payOrder(order.id);
     const updatedListings = await getMarketListings();
     setListings(updatedListings);
+    onPurchaseComplete?.();
   }
 
   return (
