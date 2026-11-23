@@ -117,3 +117,37 @@ test('notifies app after successful purchase', async () => {
     expect(onPurchaseComplete).toHaveBeenCalledTimes(1);
   });
 });
+
+test('prevents duplicate purchases while request is pending', async () => {
+  const user = userEvent.setup();
+
+  mockedGetMarketListings.mockResolvedValue([
+    {
+      id: 1,
+      seller: 'Петров',
+      product: 'Мёд',
+      unit: 'jar',
+      quantity: 20,
+      unitPrice: 300,
+      status: 'active',
+      warehouse: 'Склад Петрова',
+    },
+  ]);
+
+  // Имитируем запрос, который ещё не завершился
+  mockedCreateOrder.mockReturnValue(
+    new Promise(() => undefined)
+  );
+
+  render(<MarketPage />);
+
+  const buyButton = await screen.findByRole('button', {
+    name: 'Купить',
+  });
+
+  await user.click(buyButton);
+  await user.click(buyButton);
+
+  // Несмотря на два нажатия, заказ должен создаваться один раз
+  expect(mockedCreateOrder).toHaveBeenCalledTimes(1);
+});
