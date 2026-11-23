@@ -230,3 +230,42 @@ test('shows error when payment fails', async () => {
   // Баланс не должен обновляться как после успешной оплаты
   expect(onPurchaseComplete).not.toHaveBeenCalled();
 });
+
+test('distinguishes refresh failure from payment failure', async () => {
+  const user = userEvent.setup();
+  const onPurchaseComplete = vi.fn();
+
+  mockedGetMarketListings
+    .mockResolvedValueOnce([
+      {
+        id: 1,
+        seller: 'Петров',
+        product: 'Мёд',
+        unit: 'jar',
+        quantity: 20,
+        unitPrice: 300,
+        status: 'active',
+        warehouse: 'Склад Петрова',
+      },
+    ])
+    .mockRejectedValueOnce(new Error('Refresh failed'));
+
+  mockedCreateOrder.mockResolvedValue({ id: 10 });
+  mockedPayOrder.mockResolvedValue({ status: 'paid' });
+
+  render(
+    <MarketPage onPurchaseComplete={onPurchaseComplete} />
+  );
+
+  await user.click(
+    await screen.findByRole('button', { name: 'Купить' })
+  );
+
+  const alert = await screen.findByRole('alert');
+
+  expect(alert).toHaveTextContent(
+    'Оплата выполнена, но не удалось обновить товары'
+  );
+
+  expect(onPurchaseComplete).toHaveBeenCalledTimes(1);
+});
