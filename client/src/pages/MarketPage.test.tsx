@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { beforeEach, test, vi } from 'vitest';
 import { getMarketListings } from '../services/api';
 import { MarketPage } from './MarketPage';
+import { createOrder, getMarketListings, payOrder } from '../services/api';
 
 vi.mock('../services/api', () => ({
   getMarketListings: vi.fn(),
@@ -11,6 +12,8 @@ const mockedGetMarketListings = vi.mocked(getMarketListings);
 
 beforeEach(() => {
   mockedGetMarketListings.mockReset();
+  mockedCreateOrder.mockReset();
+  mockedPayOrder.mockReset();
 });
 
 test('shows loading state while market is pending', () => {
@@ -49,4 +52,38 @@ test('renders a live-shaped market listing', async () => {
 
   render(<MarketPage />);
   expect(await screen.findByRole('heading', { name: 'Мёд' })).toBeInTheDocument();
+});
+
+vi.mock('../services/api', () => ({
+  getMarketListings: vi.fn(),
+  createOrder: vi.fn(),
+  payOrder: vi.fn(),
+}));
+
+const mockedGetMarketListings = vi.mocked(getMarketListings);
+const mockedCreateOrder = vi.mocked(createOrder);
+const mockedPayOrder = vi.mocked(payOrder);
+
+test('notifies app after successful purchase', async () => {
+  const onPurchaseComplete = vi.fn();
+
+  mockedGetMarketListings.mockResolvedValue([
+    {
+      id: 1,
+      seller: 'Петров',
+      product: 'Мёд',
+      unit: 'jar',
+      quantity: 20,
+      unitPrice: 300,
+      status: 'active',
+      warehouse: 'Склад Петрова',
+    },
+  ]);
+
+  mockedCreateOrder.mockResolvedValue({ id: 10 });
+  mockedPayOrder.mockResolvedValue({ status: 'paid' });
+
+  render(
+    <MarketPage onPurchaseComplete={onPurchaseComplete} />
+  );
 });
