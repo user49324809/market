@@ -35,8 +35,6 @@ export function MarketPage({
   }, []);
 
   async function handleBuy(listingId: number) {
-    // Запрещаем запуск второй покупки,
-    // пока не завершилась первая
     if (purchasePending.current) {
       return;
     }
@@ -51,19 +49,22 @@ export function MarketPage({
         ACTIVE_VILLAGER_ID,
         1
       );
-      } catch {
+
+      await payOrder(order.id);
+
+      // Обновляем баланс после успешной оплаты
+      onPurchaseComplete?.();
+
+      // Обновляем остатки товаров
+      const updatedListings = await getMarketListings();
+      setListings(updatedListings);
+
+    } catch {
       setPurchaseError(
         'Не удалось завершить покупку. Проверьте состояние заказа перед повторной попыткой.'
       );
-    } await payOrder(order.id);
 
-      // Баланс обновляем сразу после успешной оплаты
-      onPurchaseComplete?.();
-
-      const updatedListings = await getMarketListings();
-      setListings(updatedListings);
     } finally {
-      // Снимаем блокировку даже при ошибке
       purchasePending.current = false;
       setPendingListingId(null);
     }
