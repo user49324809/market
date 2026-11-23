@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ListingCard } from '../components/ListingCard';
 import { createOrder, getMarketListings, payOrder } from '../services/api';
 import { ACTIVE_VILLAGER_ID } from '../config/player';
@@ -13,6 +13,7 @@ export function MarketPage({
 }: MarketPageProps) {
   const [listings, setListings] = useState<MarketListing[] | null>(null);
   const [error, setError] = useState(false);
+  const purchasePending = useRef(false);
 
   useEffect(() => {
     let active = true;
@@ -31,16 +32,32 @@ export function MarketPage({
   }, []);
 
   async function handleBuy(listingId: number) {
-    const order = await createOrder(
-      listingId,
-      ACTIVE_VILLAGER_ID,
-      1
-    );
+    // Запрещаем запуск второй покупки,
+    // пока не завершилась первая
+    if (purchasePending.current) {
+      return;
+    }
 
-    await payOrder(order.id);
-    const updatedListings = await getMarketListings();
-    setListings(updatedListings);
-    onPurchaseComplete?.();
+    purchasePending.current = true;
+
+    try {
+      const order = await createOrder(
+        listingId,
+        ACTIVE_VILLAGER_ID,
+        1
+      );
+
+      await payOrder(order.id);
+
+      // Баланс обновляем сразу после успешной оплаты
+      onPurchaseComplete?.();
+
+      const updatedListings = await getMarketListings();
+      setListings(updatedListings);
+    } finally {
+      // Снимаем блокировку даже при ошибке
+      purchasePending.current = false;
+    }
   }
 
   return (
