@@ -186,3 +186,47 @@ test('disables buy button while purchase is pending', async () => {
     })
   ).toBeDisabled();
 });
+
+test('shows error when payment fails', async () => {
+  const user = userEvent.setup();
+  const onPurchaseComplete = vi.fn();
+
+  mockedGetMarketListings.mockResolvedValue([
+    {
+      id: 1,
+      seller: 'Петров',
+      product: 'Мёд',
+      unit: 'jar',
+      quantity: 20,
+      unitPrice: 300,
+      status: 'active',
+      warehouse: 'Склад Петрова',
+    },
+  ]);
+
+  mockedCreateOrder.mockResolvedValue({ id: 10 });
+
+  // Имитируем отказ сервера при оплате
+  mockedPayOrder.mockRejectedValue(
+    new Error('Insufficient funds')
+  );
+
+  render(
+    <MarketPage
+      onPurchaseComplete={onPurchaseComplete}
+    />
+  );
+
+  await user.click(
+    await screen.findByRole('button', {
+      name: 'Купить',
+    })
+  );
+
+  expect(
+    await screen.findByRole('alert')
+  ).toHaveTextContent('Не удалось завершить покупку');
+
+  // Баланс не должен обновляться как после успешной оплаты
+  expect(onPurchaseComplete).not.toHaveBeenCalled();
+});
