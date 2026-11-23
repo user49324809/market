@@ -151,3 +151,38 @@ test('prevents duplicate purchases while request is pending', async () => {
   // Несмотря на два нажатия, заказ должен создаваться один раз
   expect(mockedCreateOrder).toHaveBeenCalledTimes(1);
 });
+
+test('disables buy button while purchase is pending', async () => {
+  const user = userEvent.setup();
+
+  mockedGetMarketListings.mockResolvedValue([
+    {
+      id: 1,
+      seller: 'Петров',
+      product: 'Мёд',
+      unit: 'jar',
+      quantity: 20,
+      unitPrice: 300,
+      status: 'active',
+      warehouse: 'Склад Петрова',
+    },
+  ]);
+
+  mockedCreateOrder.mockReturnValue(
+    new Promise(() => undefined)
+  );
+
+  render(<MarketPage />);
+
+  const buyButton = await screen.findByRole('button', {
+    name: 'Купить',
+  });
+
+  await user.click(buyButton);
+
+  expect(
+    screen.getByRole('button', {
+      name: 'Обработка покупки…',
+    })
+  ).toBeDisabled();
+});
