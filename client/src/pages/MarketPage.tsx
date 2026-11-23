@@ -88,23 +88,18 @@ export function MarketPage({
       )}
 
       {!error && listings && listings.length > 0 && (
-        <div className="listing-grid">
-          {listings.map((listing) => (
-            <ListingCard
-              listing={listing}
-              key={listing.id}
-              onBuy={() => handleBuy(listing.id)}
-            />
-          ))}
-        </div>
-      )}
-      <ListingCard
-        listing={listing}
-        key={listing.id}
-        isProcessing={pendingListingId === listing.id}
-        purchaseLocked={pendingListingId !== null}
-        onBuy={() => handleBuy(listing.id)}
-      />
+      <div className="listing-grid">
+        {listings.map((listing) => (
+          <ListingCard
+            key={listing.id}
+            listing={listing}
+            isProcessing={pendingListingId === listing.id}
+            purchaseLocked={pendingListingId !== null}
+            onBuy={() => handleBuy(listing.id)}
+          />
+        ))}
+      </div>
+    )}
     </section>
   );
 }
