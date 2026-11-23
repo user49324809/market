@@ -13,6 +13,7 @@ export function MarketPage({
 }: MarketPageProps) {
   const [listings, setListings] = useState<MarketListing[] | null>(null);
   const [error, setError] = useState(false);
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
   const purchasePending = useRef(false);
   const [pendingListingId, setPendingListingId] =
   useState<number | null>(null);
@@ -42,6 +43,7 @@ export function MarketPage({
 
     purchasePending.current = true;
     setPendingListingId(listingId);
+    setPurchaseError(null);
 
     try {
       const order = await createOrder(
@@ -49,8 +51,11 @@ export function MarketPage({
         ACTIVE_VILLAGER_ID,
         1
       );
-
-      await payOrder(order.id);
+      } catch {
+      setPurchaseError(
+        'Не удалось завершить покупку. Проверьте состояние заказа перед повторной попыткой.'
+      );
+    } await payOrder(order.id);
 
       // Баланс обновляем сразу после успешной оплаты
       onPurchaseComplete?.();
@@ -85,6 +90,12 @@ export function MarketPage({
 
       {!error && listings?.length === 0 && (
         <div className="market-state">Сегодня на рынке нет активных предложений</div>
+      )}
+
+      {purchaseError && (
+        <div role="alert" className="market-state market-state--error">
+          {purchaseError}
+        </div>
       )}
 
       {!error && listings && listings.length > 0 && (
