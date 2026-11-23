@@ -14,6 +14,8 @@ export function MarketPage({
   const [listings, setListings] = useState<MarketListing[] | null>(null);
   const [error, setError] = useState(false);
   const purchasePending = useRef(false);
+  const [pendingListingId, setPendingListingId] =
+  useState<number | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -39,6 +41,7 @@ export function MarketPage({
     }
 
     purchasePending.current = true;
+    setPendingListingId(listingId);
 
     try {
       const order = await createOrder(
@@ -57,6 +60,7 @@ export function MarketPage({
     } finally {
       // Снимаем блокировку даже при ошибке
       purchasePending.current = false;
+      setPendingListingId(null);
     }
   }
 
@@ -94,6 +98,13 @@ export function MarketPage({
           ))}
         </div>
       )}
+      <ListingCard
+        listing={listing}
+        key={listing.id}
+        isProcessing={pendingListingId === listing.id}
+        purchaseLocked={pendingListingId !== null}
+        onBuy={() => handleBuy(listing.id)}
+      />
     </section>
   );
 }

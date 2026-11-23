@@ -15,9 +15,16 @@ const unitLabels: Record<string, string> = {
 interface ListingCardProps {
   listing: MarketListing;
   onBuy: () => void;
+  isProcessing?: boolean;
+  purchaseLocked?: boolean;
 }
 
-export function ListingCard({ listing, onBuy }: ListingCardProps) {
+export function ListingCard({
+  listing,
+  onBuy,
+  isProcessing = false,
+  purchaseLocked = false,
+}: ListingCardProps) {
   const unit = unitLabels[listing.unit] ?? listing.unit;
 
   return (
@@ -46,9 +53,13 @@ export function ListingCard({ listing, onBuy }: ListingCardProps) {
       <button
         type="button"
         onClick={onBuy}
-        disabled={listing.status !== 'active' || listing.quantity <= 0}
+        disabled={
+          purchaseLocked ||
+          listing.status !== 'active' ||
+          listing.quantity <= 0
+        }
       >
-        Купить
+        {isProcessing ? 'Обработка покупки…' : 'Купить'}
       </button>
     </article>
   );
